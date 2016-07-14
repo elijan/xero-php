@@ -65,7 +65,14 @@ class LinkedTransaction extends Remote\Object
     /**
      * The last modified date in UTC format
      *
-     * @property \DateTime UpdatedDateUTC
+     * @property \DateTimeInterface UpdatedDateUTC
+     */
+
+    /**
+     * The Type of the source tranasction. This will be ACCPAY if the linked transaction was created from
+     * an invoice and SPEND if it was created from a bank transaction.
+     *
+     * @property string SourceTransactionTypeCode
      */
 
 
@@ -155,7 +162,8 @@ class LinkedTransaction extends Remote\Object
             'LinkedTransactionID' => array (false, self::PROPERTY_TYPE_STRING, null, false, false),
             'Status' => array (false, self::PROPERTY_TYPE_STRING, null, false, false),
             'Type' => array (false, self::PROPERTY_TYPE_ENUM, null, false, false),
-            'UpdatedDateUTC' => array (false, self::PROPERTY_TYPE_TIMESTAMP, '\\DateTime', false, false)
+            'UpdatedDateUTC' => array (false, self::PROPERTY_TYPE_TIMESTAMP, '\\DateTimeInterface', false, false),
+            'SourceTransactionTypeCode' => array (false, self::PROPERTY_TYPE_STRING, null, false, false)
         );
     }
 
@@ -317,7 +325,7 @@ class LinkedTransaction extends Remote\Object
     }
 
     /**
-     * @return \DateTime
+     * @return \DateTimeInterface
      */
     public function getUpdatedDateUTC()
     {
@@ -325,13 +333,32 @@ class LinkedTransaction extends Remote\Object
     }
 
     /**
-     * @param \DateTime $value
+     * @param \DateTimeInterface $value
      * @return LinkedTransaction
      */
-    public function setUpdatedDateUTC(\DateTime $value)
+    public function setUpdatedDateUTC(\DateTimeInterface $value)
     {
         $this->propertyUpdated('UpdatedDateUTC', $value);
         $this->_data['UpdatedDateUTC'] = $value;
+        return $this;
+    }
+
+    /**
+     * @return string
+     */
+    public function getSourceTransactionTypeCode()
+    {
+        return $this->_data['SourceTransactionTypeCode'];
+    }
+
+    /**
+     * @param string $value
+     * @return LinkedTransaction
+     */
+    public function setSourceTransactionTypeCode($value)
+    {
+        $this->propertyUpdated('SourceTransactionTypeCode', $value);
+        $this->_data['SourceTransactionTypeCode'] = $value;
         return $this;
     }
 

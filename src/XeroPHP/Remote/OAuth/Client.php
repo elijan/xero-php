@@ -2,7 +2,6 @@
 
 namespace XeroPHP\Remote\OAuth;
 
-use XeroPHP\Exception;
 use XeroPHP\Helpers;
 use XeroPHP\Remote\OAuth\SignatureMethod\HMACSHA1;
 use XeroPHP\Remote\OAuth\SignatureMethod\PLAINTEXT;
@@ -29,6 +28,10 @@ class Client {
     const SIGN_LOCATION_QUERY  = 'query_string';
 
     private $config;
+
+    /**
+     * @var Request $request
+     */
     private $request;
 
     /*
@@ -195,11 +198,14 @@ class Client {
      * @return string
      */
     private function getNonce($length = 20) {
-        $nonce = '';
+        // Add more uniqueness to the nonce
+        $parts = explode('.', microtime(true));
+        $nonce = base_convert($parts[1], 10, 36);
 
-        for($i = 0; $i < $length; $i++) {
+        for($i = 0; $i < $length - strlen($nonce); $i++) {
             $nonce .= base_convert(mt_rand(0, 35), 10, 36);
         }
+
         return $nonce;
     }
 

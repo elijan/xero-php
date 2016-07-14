@@ -14,12 +14,6 @@ class CreditNote extends Remote\Object
     use AttachmentTrait;
 
     /**
-     * An optional field to store a reference
-     *
-     * @property string Reference
-     */
-
-    /**
      * See Credit Note Types
      *
      * @property string Type
@@ -34,11 +28,11 @@ class CreditNote extends Remote\Object
     /**
      * The date the credit note is issued YYYY-MM-DD
      *
-     * @property \DateTime Date
+     * @property \DateTimeInterface Date
      */
 
     /**
-     * See Invoice Status Codes
+     * See Credit Note Status Codes
      *
      * @property string Status
      */
@@ -76,7 +70,7 @@ class CreditNote extends Remote\Object
     /**
      * UTC timestamp of last update to the credit note
      *
-     * @property \DateTime UpdatedDateUTC
+     * @property \DateTimeInterface UpdatedDateUTC
      */
 
     /**
@@ -88,7 +82,7 @@ class CreditNote extends Remote\Object
     /**
      * Date when credit note was fully paid(UTC format)
      *
-     * @property \DateTime FullyPaidOnDate
+     * @property \DateTimeInterface FullyPaidOnDate
      */
 
     /**
@@ -98,13 +92,21 @@ class CreditNote extends Remote\Object
      */
 
     /**
-     * The user friendly unique identifier for a credit note e.g. CN 1001
+     * ACCRECCREDIT – Unique alpha numeric code identifying credit note (when missing will auto-generate
+     * from your Organisation Invoice Settings)
      *
      * @property string CreditNoteNumber
      */
 
     /**
-     * boolean to indicate if a credit note has been sent to a contact via the Xero app
+     * ACCRECCREDIT only – additional reference number
+     *
+     * @property string Reference
+     */
+
+    /**
+     * boolean to indicate if a credit note has been sent to a contact via the Xero app (currently read
+     * only)
      *
      * @property bool SentToContact
      */
@@ -214,21 +216,21 @@ class CreditNote extends Remote\Object
     public static function getProperties()
     {
         return array(
-            'Reference' => array (false, self::PROPERTY_TYPE_STRING, null, false, false),
             'Type' => array (false, self::PROPERTY_TYPE_ENUM, null, false, false),
             'Contact' => array (false, self::PROPERTY_TYPE_OBJECT, 'Accounting\\Contact', false, false),
-            'Date' => array (false, self::PROPERTY_TYPE_DATE, '\\DateTime', false, false),
-            'Status' => array (false, self::PROPERTY_TYPE_ENUM, null, false, false),
+            'Date' => array (false, self::PROPERTY_TYPE_DATE, '\\DateTimeInterface', false, false),
+            'Status' => array (false, self::PROPERTY_TYPE_STRING, null, false, false),
             'LineAmountTypes' => array (false, self::PROPERTY_TYPE_ENUM, null, false, false),
             'LineItems' => array (false, self::PROPERTY_TYPE_OBJECT, 'Accounting\\Invoice\\LineItem', true, false),
             'SubTotal' => array (false, self::PROPERTY_TYPE_FLOAT, null, false, false),
             'TotalTax' => array (false, self::PROPERTY_TYPE_FLOAT, null, false, false),
             'Total' => array (false, self::PROPERTY_TYPE_FLOAT, null, false, false),
-            'UpdatedDateUTC' => array (false, self::PROPERTY_TYPE_TIMESTAMP, '\\DateTime', false, false),
+            'UpdatedDateUTC' => array (false, self::PROPERTY_TYPE_TIMESTAMP, '\\DateTimeInterface', false, false),
             'CurrencyCode' => array (false, self::PROPERTY_TYPE_STRING, null, false, false),
-            'FullyPaidOnDate' => array (false, self::PROPERTY_TYPE_DATE, '\\DateTime', false, false),
+            'FullyPaidOnDate' => array (false, self::PROPERTY_TYPE_DATE, '\\DateTimeInterface', false, false),
             'CreditNoteID' => array (false, self::PROPERTY_TYPE_STRING, null, false, false),
             'CreditNoteNumber' => array (false, self::PROPERTY_TYPE_STRING, null, false, false),
+            'Reference' => array (false, self::PROPERTY_TYPE_STRING, null, false, false),
             'SentToContact' => array (false, self::PROPERTY_TYPE_BOOLEAN, null, false, false),
             'CurrencyRate' => array (false, self::PROPERTY_TYPE_FLOAT, null, false, false),
             'RemainingCredit' => array (false, self::PROPERTY_TYPE_STRING, null, false, false),
@@ -241,25 +243,6 @@ class CreditNote extends Remote\Object
     public static function isPageable()
     {
         return false;
-    }
-
-    /**
-     * @return string
-     */
-    public function getReference()
-    {
-        return $this->_data['Reference'];
-    }
-
-    /**
-     * @param string $value
-     * @return CreditNote
-     */
-    public function setReference($value)
-    {
-        $this->propertyUpdated('Reference', $value);
-        $this->_data['Reference'] = $value;
-        return $this;
     }
 
     /**
@@ -301,7 +284,7 @@ class CreditNote extends Remote\Object
     }
 
     /**
-     * @return \DateTime
+     * @return \DateTimeInterface
      */
     public function getDate()
     {
@@ -309,10 +292,10 @@ class CreditNote extends Remote\Object
     }
 
     /**
-     * @param \DateTime $value
+     * @param \DateTimeInterface $value
      * @return CreditNote
      */
-    public function setDate(\DateTime $value)
+    public function setDate(\DateTimeInterface $value)
     {
         $this->propertyUpdated('Date', $value);
         $this->_data['Date'] = $value;
@@ -438,7 +421,7 @@ class CreditNote extends Remote\Object
     }
 
     /**
-     * @return \DateTime
+     * @return \DateTimeInterface
      */
     public function getUpdatedDateUTC()
     {
@@ -446,10 +429,10 @@ class CreditNote extends Remote\Object
     }
 
     /**
-     * @param \DateTime $value
+     * @param \DateTimeInterface $value
      * @return CreditNote
      */
-    public function setUpdatedDateUTC(\DateTime $value)
+    public function setUpdatedDateUTC(\DateTimeInterface $value)
     {
         $this->propertyUpdated('UpdatedDateUTC', $value);
         $this->_data['UpdatedDateUTC'] = $value;
@@ -476,7 +459,7 @@ class CreditNote extends Remote\Object
     }
 
     /**
-     * @return \DateTime
+     * @return \DateTimeInterface
      */
     public function getFullyPaidOnDate()
     {
@@ -484,10 +467,10 @@ class CreditNote extends Remote\Object
     }
 
     /**
-     * @param \DateTime $value
+     * @param \DateTimeInterface $value
      * @return CreditNote
      */
-    public function setFullyPaidOnDate(\DateTime $value)
+    public function setFullyPaidOnDate(\DateTimeInterface $value)
     {
         $this->propertyUpdated('FullyPaidOnDate', $value);
         $this->_data['FullyPaidOnDate'] = $value;
@@ -529,6 +512,25 @@ class CreditNote extends Remote\Object
     {
         $this->propertyUpdated('CreditNoteNumber', $value);
         $this->_data['CreditNoteNumber'] = $value;
+        return $this;
+    }
+
+    /**
+     * @return string
+     */
+    public function getReference()
+    {
+        return $this->_data['Reference'];
+    }
+
+    /**
+     * @param string $value
+     * @return CreditNote
+     */
+    public function setReference($value)
+    {
+        $this->propertyUpdated('Reference', $value);
+        $this->_data['Reference'] = $value;
         return $this;
     }
 

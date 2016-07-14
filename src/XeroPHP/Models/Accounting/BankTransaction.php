@@ -44,7 +44,7 @@ class BankTransaction extends Remote\Object
     /**
      * Date of transaction – YYYY-MM-DD
      *
-     * @property \DateTime Date
+     * @property \DateTimeInterface Date
      */
 
     /**
@@ -113,9 +113,23 @@ class BankTransaction extends Remote\Object
      */
 
     /**
+     * Xero generated unique identifier for a Prepayment. This will be returned on BankTransactions with a
+     * Type of SPEND-PREPAYMENT or RECEIVE-PREPAYMENT
+     *
+     * @property string PrepaymentID
+     */
+
+    /**
+     * Xero generated unique identifier for an Overpayment. This will be returned on BankTransactions with
+     * a Type of SPEND-OVERPAYMENT or RECEIVE-OVERPAYMENT
+     *
+     * @property string OverpaymentID
+     */
+
+    /**
      * Last modified date UTC format
      *
-     * @property \DateTime UpdatedDateUTC
+     * @property \DateTimeInterface UpdatedDateUTC
      */
 
     /**
@@ -213,7 +227,7 @@ class BankTransaction extends Remote\Object
             'LineItems' => array (true, self::PROPERTY_TYPE_OBJECT, 'Accounting\\BankTransaction\\LineItem', true, false),
             'BankAccount' => array (true, self::PROPERTY_TYPE_OBJECT, 'Accounting\\BankTransaction\\BankAccount', false, false),
             'IsReconciled' => array (false, self::PROPERTY_TYPE_BOOLEAN, null, false, false),
-            'Date' => array (false, self::PROPERTY_TYPE_DATE, '\\DateTime', false, false),
+            'Date' => array (false, self::PROPERTY_TYPE_DATE, '\\DateTimeInterface', false, false),
             'Reference' => array (false, self::PROPERTY_TYPE_STRING, null, false, false),
             'CurrencyCode' => array (false, self::PROPERTY_TYPE_STRING, null, false, false),
             'CurrencyRate' => array (false, self::PROPERTY_TYPE_FLOAT, null, false, false),
@@ -224,7 +238,9 @@ class BankTransaction extends Remote\Object
             'TotalTax' => array (false, self::PROPERTY_TYPE_FLOAT, null, false, false),
             'Total' => array (false, self::PROPERTY_TYPE_FLOAT, null, false, false),
             'BankTransactionID' => array (false, self::PROPERTY_TYPE_STRING, null, false, false),
-            'UpdatedDateUTC' => array (false, self::PROPERTY_TYPE_TIMESTAMP, '\\DateTime', false, false),
+            'PrepaymentID' => array (false, self::PROPERTY_TYPE_STRING, null, false, false),
+            'OverpaymentID' => array (false, self::PROPERTY_TYPE_STRING, null, false, false),
+            'UpdatedDateUTC' => array (false, self::PROPERTY_TYPE_TIMESTAMP, '\\DateTimeInterface', false, false),
             'HasAttachments' => array (false, self::PROPERTY_TYPE_BOOLEAN, null, false, false)
         );
     }
@@ -334,7 +350,7 @@ class BankTransaction extends Remote\Object
     }
 
     /**
-     * @return \DateTime
+     * @return \DateTimeInterface
      */
     public function getDate()
     {
@@ -342,10 +358,10 @@ class BankTransaction extends Remote\Object
     }
 
     /**
-     * @param \DateTime $value
+     * @param \DateTimeInterface $value
      * @return BankTransaction
      */
-    public function setDate(\DateTime $value)
+    public function setDate(\DateTimeInterface $value)
     {
         $this->propertyUpdated('Date', $value);
         $this->_data['Date'] = $value;
@@ -543,7 +559,25 @@ class BankTransaction extends Remote\Object
     }
 
     /**
-     * @return \DateTime
+     * @return string
+     */
+    public function getPrepaymentID()
+    {
+        return $this->_data['PrepaymentID'];
+    }
+
+
+    /**
+     * @return string
+     */
+    public function getOverpaymentID()
+    {
+        return $this->_data['OverpaymentID'];
+    }
+
+
+    /**
+     * @return \DateTimeInterface
      */
     public function getUpdatedDateUTC()
     {

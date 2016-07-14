@@ -1,5 +1,5 @@
 <?php
-namespace XeroPHP\Models\Accounting\Receipt;
+namespace XeroPHP\Models\Accounting\Overpayment;
 
 use XeroPHP\Remote;
 use XeroPHP\Models\Accounting\TrackingCategory;
@@ -16,6 +16,12 @@ class LineItem extends Remote\Object
      */
 
     /**
+     * LineItem Quantity
+     *
+     * @property string Quantity
+     */
+
+    /**
      * Lineitem unit amount. By default, unit amount will be rounded to two decimal places. You can opt in
      * to use four decimal places by adding the querystring parameter unitdp=4 to your query. See the
      * Rounding in Xero guide for more information.
@@ -24,16 +30,9 @@ class LineItem extends Remote\Object
      */
 
     /**
-     * AccountCode must be active for the organisation. AccountCodes can only be applied to a receipt when
-     * the ShowInExpenseClaims value is true. Bank Accounts can not be applied to receipts.
+     * See Accounts
      *
      * @property string AccountCode
-     */
-
-    /**
-     * LineItem Quantity
-     *
-     * @property string Quantity
      */
 
     /**
@@ -44,24 +43,24 @@ class LineItem extends Remote\Object
      */
 
     /**
+     * The tax amount is auto calculated as a percentage of the line amount (see below) based on the tax
+     * rate. This value can be overriden if the calculated <TaxAmount> is not correct.
+     *
+     * @property float TaxAmount
+     */
+
+    /**
      * If you wish to omit either of the <Quantity> or <UnitAmount> you can provide a LineAmount and Xero
-     * will calculate the missing amount for you
+     * will calculate the missing amount for you.
      *
      * @property float LineAmount
      */
 
     /**
-     * Optional Tracking Category – see Tracking.  Any LineItem can have a maximum of 2
-     * <TrackingCategory> elements.
+     * Optional Tracking Category – see Tracking. Any LineItem can have a maximum of 2 <TrackingCategory>
+     * elements.
      *
      * @property TrackingCategory[] Tracking
-     */
-
-    /**
-     * Percentage discount being applied to a line item. Vote here to be able to create discounts via the
-     * API.
-     *
-     * @property string DiscountRate
      */
 
 
@@ -133,14 +132,14 @@ class LineItem extends Remote\Object
     public static function getProperties()
     {
         return array(
-            'Description' => array (true, self::PROPERTY_TYPE_STRING, null, false, false),
-            'UnitAmount' => array (true, self::PROPERTY_TYPE_FLOAT, null, false, false),
-            'AccountCode' => array (true, self::PROPERTY_TYPE_STRING, null, false, false),
+            'Description' => array (false, self::PROPERTY_TYPE_STRING, null, false, false),
             'Quantity' => array (false, self::PROPERTY_TYPE_STRING, null, false, false),
+            'UnitAmount' => array (false, self::PROPERTY_TYPE_FLOAT, null, false, false),
+            'AccountCode' => array (false, self::PROPERTY_TYPE_STRING, null, false, false),
             'TaxType' => array (false, self::PROPERTY_TYPE_ENUM, null, false, false),
+            'TaxAmount' => array (false, self::PROPERTY_TYPE_FLOAT, null, false, false),
             'LineAmount' => array (false, self::PROPERTY_TYPE_FLOAT, null, false, false),
-            'Tracking' => array (false, self::PROPERTY_TYPE_OBJECT, 'Accounting\\TrackingCategory', true, false),
-            'DiscountRate' => array (false, self::PROPERTY_TYPE_STRING, null, false, false)
+            'Tracking' => array (false, self::PROPERTY_TYPE_OBJECT, 'Accounting\\TrackingCategory', true, false)
         );
     }
 
@@ -157,54 +156,6 @@ class LineItem extends Remote\Object
         return $this->_data['Description'];
     }
 
-    /**
-     * @param string $value
-     * @return LineItem
-     */
-    public function setDescription($value)
-    {
-        $this->propertyUpdated('Description', $value);
-        $this->_data['Description'] = $value;
-        return $this;
-    }
-
-    /**
-     * @return float
-     */
-    public function getUnitAmount()
-    {
-        return $this->_data['UnitAmount'];
-    }
-
-    /**
-     * @param float $value
-     * @return LineItem
-     */
-    public function setUnitAmount($value)
-    {
-        $this->propertyUpdated('UnitAmount', $value);
-        $this->_data['UnitAmount'] = $value;
-        return $this;
-    }
-
-    /**
-     * @return string
-     */
-    public function getAccountCode()
-    {
-        return $this->_data['AccountCode'];
-    }
-
-    /**
-     * @param string $value
-     * @return LineItem
-     */
-    public function setAccountCode($value)
-    {
-        $this->propertyUpdated('AccountCode', $value);
-        $this->_data['AccountCode'] = $value;
-        return $this;
-    }
 
     /**
      * @return string
@@ -214,16 +165,24 @@ class LineItem extends Remote\Object
         return $this->_data['Quantity'];
     }
 
+
     /**
-     * @param string $value
-     * @return LineItem
+     * @return float
      */
-    public function setQuantity($value)
+    public function getUnitAmount()
     {
-        $this->propertyUpdated('Quantity', $value);
-        $this->_data['Quantity'] = $value;
-        return $this;
+        return $this->_data['UnitAmount'];
     }
+
+
+    /**
+     * @return string
+     */
+    public function getAccountCode()
+    {
+        return $this->_data['AccountCode'];
+    }
+
 
     /**
      * @return string
@@ -233,16 +192,15 @@ class LineItem extends Remote\Object
         return $this->_data['TaxType'];
     }
 
+
     /**
-     * @param string $value
-     * @return LineItem
+     * @return float
      */
-    public function setTaxType($value)
+    public function getTaxAmount()
     {
-        $this->propertyUpdated('TaxType', $value);
-        $this->_data['TaxType'] = $value;
-        return $this;
+        return $this->_data['TaxAmount'];
     }
+
 
     /**
      * @return float
@@ -252,16 +210,6 @@ class LineItem extends Remote\Object
         return $this->_data['LineAmount'];
     }
 
-    /**
-     * @param float $value
-     * @return LineItem
-     */
-    public function setLineAmount($value)
-    {
-        $this->propertyUpdated('LineAmount', $value);
-        $this->_data['LineAmount'] = $value;
-        return $this;
-    }
 
     /**
      * @return TrackingCategory[]|Remote\Collection
@@ -270,28 +218,6 @@ class LineItem extends Remote\Object
     public function getTracking()
     {
         return $this->_data['Tracking'];
-    }
-
-    /**
-     * @param TrackingCategory $value
-     * @return LineItem
-     */
-    public function addTracking(TrackingCategory $value)
-    {
-        $this->propertyUpdated('Tracking', $value);
-        if(!isset($this->_data['Tracking'])){
-            $this->_data['Tracking'] = new Remote\Collection();
-        }
-        $this->_data['Tracking'][] = $value;
-        return $this;
-    }
-
-    /**
-     * @return string
-     */
-    public function getDiscountRate()
-    {
-        return $this->_data['DiscountRate'];
     }
 
 

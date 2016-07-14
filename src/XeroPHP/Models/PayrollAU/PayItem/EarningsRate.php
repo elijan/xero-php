@@ -13,9 +13,10 @@ class EarningsRate extends Remote\Object
      */
 
     /**
-     * Display name of the earnings rate, as it will appear on payslips. (max length = 100)
+     * This property has been removed from the Xero API
      *
      * @property string DisplayName
+     * @deprecated
      */
 
     /**
@@ -91,6 +92,7 @@ class EarningsRate extends Remote\Object
     const EARNINGSTYPE_ORDINARYTIMEEARNINGS = 'ORDINARYTIMEEARNINGS';
     const EARNINGSTYPE_OVERTIMEEARNINGS     = 'OVERTIMEEARNINGS';
     const EARNINGSTYPE_ALLOWANCE            = 'ALLOWANCE';
+    const EARNINGSTYPE_LUMPSUMD             = 'LUMPSUMD';
 
     const RATETYPE_FIXEDAMOUNT = 'FIXEDAMOUNT';
     const RATETYPE_MULTIPLE    = 'MULTIPLE';
@@ -206,6 +208,7 @@ class EarningsRate extends Remote\Object
 
     /**
      * @return string
+     * @deprecated
      */
     public function getDisplayName()
     {
@@ -215,6 +218,7 @@ class EarningsRate extends Remote\Object
     /**
      * @param string $value
      * @return EarningsRate
+     * @deprecated
      */
     public function setDisplayName($value)
     {

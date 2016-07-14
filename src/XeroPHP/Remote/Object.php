@@ -3,7 +3,6 @@
 namespace XeroPHP\Remote;
 
 use XeroPHP\Application;
-use XeroPHP\Exception;
 use XeroPHP\Helpers;
 
 /**
@@ -243,7 +242,7 @@ abstract class Object implements ObjectInterface, \JsonSerializable, \ArrayAcces
 
             case self::PROPERTY_TYPE_DATE:
             case self::PROPERTY_TYPE_TIMESTAMP:
-                /** @var \DateTime $value */
+                /** @var \DateTimeInterface $value */
                 return $value->format('c');
 
             case self::PROPERTY_TYPE_OBJECT:
@@ -263,7 +262,7 @@ abstract class Object implements ObjectInterface, \JsonSerializable, \ArrayAcces
      * @param $type
      * @param $value
      * @param $php_type
-     * @return bool|\DateTime|float|int|string
+     * @return bool|\DateTimeInterface|float|int|string
      */
     public static function castFromString($type, $value, $php_type) {
 
@@ -354,6 +353,18 @@ abstract class Object implements ObjectInterface, \JsonSerializable, \ArrayAcces
             throw new Exception('->save() is only available on objects that have an injected application context.');
         }
         $this->_application->save($this);
+    }
+
+    /**
+     * Shorthand delete an object if it is instantiated with app context.
+     *
+     * @throws Exception
+     */
+    public function delete(){
+        if($this->_application === null){
+            throw new Exception('->delete() is only available on objects that have an injected application context.');
+        }
+        $this->_application->delete($this);
     }
 
     /**

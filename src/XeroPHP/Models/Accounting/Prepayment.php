@@ -3,7 +3,7 @@ namespace XeroPHP\Models\Accounting;
 
 use XeroPHP\Remote;
 use XeroPHP\Traits\AttachmentTrait;
-use XeroPHP\Models\Accounting\BankTransaction\LineItem;
+use XeroPHP\Models\Accounting\Prepayment\LineItem;
 use XeroPHP\Models\Accounting\Prepayment\Allocation;
 
 class Prepayment extends Remote\Object
@@ -33,7 +33,7 @@ class Prepayment extends Remote\Object
     /**
      * The date the prepayment is created YYYY-MM-DD
      *
-     * @property \DateTime Date
+     * @property \DateTimeInterface Date
      */
 
     /**
@@ -75,7 +75,7 @@ class Prepayment extends Remote\Object
     /**
      * UTC timestamp of last update to the prepayment
      *
-     * @property \DateTime UpdatedDateUTC
+     * @property \DateTimeInterface UpdatedDateUTC
      */
 
     /**
@@ -85,9 +85,10 @@ class Prepayment extends Remote\Object
      */
 
     /**
-     * Date when the prepayment was fully allocated (UTC format)
+     * This property has been removed from the Xero API
      *
-     * @property \DateTime FullyPaidOnDate
+     * @property string FullyPaidOnDate
+     * @deprecated
      */
 
     /**
@@ -202,16 +203,16 @@ class Prepayment extends Remote\Object
             'Reference' => array (false, self::PROPERTY_TYPE_STRING, null, false, false),
             'Type' => array (false, self::PROPERTY_TYPE_ENUM, null, false, false),
             'Contact' => array (false, self::PROPERTY_TYPE_OBJECT, 'Accounting\\Contact', false, false),
-            'Date' => array (false, self::PROPERTY_TYPE_DATE, '\\DateTime', false, false),
+            'Date' => array (false, self::PROPERTY_TYPE_DATE, '\\DateTimeInterface', false, false),
             'Status' => array (false, self::PROPERTY_TYPE_ENUM, null, false, false),
             'LineAmountTypes' => array (false, self::PROPERTY_TYPE_ENUM, null, false, false),
-            'LineItems' => array (false, self::PROPERTY_TYPE_OBJECT, 'Accounting\\BankTransaction\\LineItem', true, false),
+            'LineItems' => array (false, self::PROPERTY_TYPE_OBJECT, 'Accounting\\Prepayment\\LineItem', true, false),
             'SubTotal' => array (false, self::PROPERTY_TYPE_FLOAT, null, false, false),
             'TotalTax' => array (false, self::PROPERTY_TYPE_FLOAT, null, false, false),
             'Total' => array (false, self::PROPERTY_TYPE_FLOAT, null, false, false),
-            'UpdatedDateUTC' => array (false, self::PROPERTY_TYPE_TIMESTAMP, '\\DateTime', false, false),
+            'UpdatedDateUTC' => array (false, self::PROPERTY_TYPE_TIMESTAMP, '\\DateTimeInterface', false, false),
             'CurrencyCode' => array (false, self::PROPERTY_TYPE_STRING, null, false, false),
-            'FullyPaidOnDate' => array (false, self::PROPERTY_TYPE_DATE, '\\DateTime', false, false),
+            'FullyPaidOnDate' => array (false, self::PROPERTY_TYPE_STRING, null, false, false),
             'PrepaymentID' => array (false, self::PROPERTY_TYPE_STRING, null, false, false),
             'CurrencyRate' => array (false, self::PROPERTY_TYPE_FLOAT, null, false, false),
             'RemainingCredit' => array (false, self::PROPERTY_TYPE_STRING, null, false, false),
@@ -285,7 +286,7 @@ class Prepayment extends Remote\Object
     }
 
     /**
-     * @return \DateTime
+     * @return \DateTimeInterface
      */
     public function getDate()
     {
@@ -293,10 +294,10 @@ class Prepayment extends Remote\Object
     }
 
     /**
-     * @param \DateTime $value
+     * @param \DateTimeInterface $value
      * @return Prepayment
      */
-    public function setDate(\DateTime $value)
+    public function setDate(\DateTimeInterface $value)
     {
         $this->propertyUpdated('Date', $value);
         $this->_data['Date'] = $value;
@@ -422,7 +423,7 @@ class Prepayment extends Remote\Object
     }
 
     /**
-     * @return \DateTime
+     * @return \DateTimeInterface
      */
     public function getUpdatedDateUTC()
     {
@@ -430,10 +431,10 @@ class Prepayment extends Remote\Object
     }
 
     /**
-     * @param \DateTime $value
+     * @param \DateTimeInterface $value
      * @return Prepayment
      */
-    public function setUpdatedDateUTC(\DateTime $value)
+    public function setUpdatedDateUTC(\DateTimeInterface $value)
     {
         $this->propertyUpdated('UpdatedDateUTC', $value);
         $this->_data['UpdatedDateUTC'] = $value;
@@ -460,7 +461,8 @@ class Prepayment extends Remote\Object
     }
 
     /**
-     * @return \DateTime
+     * @return string
+     * @deprecated
      */
     public function getFullyPaidOnDate()
     {
@@ -468,10 +470,11 @@ class Prepayment extends Remote\Object
     }
 
     /**
-     * @param \DateTime $value
+     * @param string $value
      * @return Prepayment
+     * @deprecated
      */
-    public function setFullyPaidOnDate(\DateTime $value)
+    public function setFullyPaidOnDate($value)
     {
         $this->propertyUpdated('FullyPaidOnDate', $value);
         $this->_data['FullyPaidOnDate'] = $value;

@@ -26,7 +26,7 @@ This library has been tested with Private, Public and Partner apps but is still 
 Any files in the XeroPHP/Models directory are system generated.  Ideally, these shouldn't be modified directly, as it will be difficult to track/update.  Instead, if you notice something wrong with them, have a look at the ```generate/``` folder.  This contains the generation code, which actually just scrapes <http://developer.xero.com/documentation/> and parses out model/property/relation information.
 
 ## Requirements
-* PHP 5.4+
+* PHP 5.5+
 * php\_curl extension - ensure a recent version (7.30+)
 * php\_openssl extension
 
@@ -36,7 +36,7 @@ Using composer:
 
 ```json
   "require": {
-  	"calcinai/xero-php": "1.2.*"
+  	"calcinai/xero-php": "1.3.*"
   }
 ```
 
@@ -68,14 +68,14 @@ foreach ($contacts as $contact) {
 
 Search for objects meeting certain criteria
 ```php
-$xero->load('Accounting\\Invoices')
+$xero->load('Accounting\\Invoice')
 	->where('Status', \XeroPHP\Models\Accounting\Invoice::INVOICE_STATUS_AUTHORISED)
 	->where('Type', \XeroPHP\Models\Accounting\Invoice::INVOICE_TYPE_ACCREC)
 	->execute();
 ```
 or
 ```php
-$xero->load('Accounting\\Invoices')->where('
+$xero->load('Accounting\\Invoice')->where('
 	Status=="' . \XeroPHP\Models\Accounting\Invoice::INVOICE_STATUS_AUTHORISED . '" AND
 	Type=="' . \XeroPHP\Models\Accounting\Invoice::INVOICE_TYPE_ACCREC . '"
 ')->execute();

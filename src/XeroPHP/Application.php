@@ -2,12 +2,13 @@
 
 namespace XeroPHP;
 
+use XeroPHP\Remote;
 use XeroPHP\Remote\Collection;
 use XeroPHP\Remote\OAuth\Client;
-use XeroPHP\Remote\Object;
 use XeroPHP\Remote\Query;
 use XeroPHP\Remote\Request;
 use XeroPHP\Remote\URL;
+
 
 abstract class Application {
 
@@ -69,16 +70,18 @@ abstract class Application {
     }
 
     /**
-     * @param string|null $oAuthToken
+     * @param string|null $oauth_token
      * @return string
      */
-    public function getAuthorizeURL($oAuthToken = null) {
-        $authorizeUrl = $this->oauth_client->getAuthorizeURL();
-        if ($oAuthToken) {
-            return sprintf('%s?oauth_token=%s', $authorizeUrl, $oAuthToken);
+    public function getAuthorizeURL($oauth_token = null) {
+        $authorize_url = $this->oauth_client->getAuthorizeURL();
+
+        if ($oauth_token !== null) {
+            $operator = parse_url($authorize_url, PHP_URL_QUERY) !== null ? '&' : '?';
+            $authorize_url .= sprintf('%soauth_token=%s', $operator, $oauth_token);
         }
 
-        return $authorizeUrl;
+        return $authorize_url;
     }
 
     /**
@@ -126,6 +129,7 @@ abstract class Application {
      */
     public function loadByGUID($model, $guid) {
 
+        /** @var Remote\Object $class */
         $class = $this->validateModelClass($model);
 
         $uri = sprintf('%s/%s', $class::getResourceURI(), $guid);
@@ -137,6 +141,7 @@ abstract class Application {
 
         //Return the first (if any) element from the response.
         foreach($request->getResponse()->getElements() as $element){
+            /** @var Remote\Object $object */
             $object = new $class($this);
             $object->fromStringArray($element);
             return $object;
@@ -159,10 +164,11 @@ abstract class Application {
 
     /**
      * @param Remote\Object $object
+     * @param bool $replace_data
      * @return null
      * @throws Exception
      */
-    public function save(Object $object) {
+    public function save(Remote\Object $object, $replace_data = false) {
 
         //Saves any properties that don't want to be included in the normal loop (special saving endpoints)
         $this->savePropertiesDirectly($object);
@@ -172,18 +178,18 @@ abstract class Application {
 
             //In this case it's new
             if($object->hasGUID()) {
-                $method = Request::METHOD_POST;
+                $method = $object::supportsMethod(Request::METHOD_POST) ? Request::METHOD_POST : Request::METHOD_PUT;
                 $uri = sprintf('%s/%s', $object::getResourceURI(), $object->getGUID());
-
             } else {
-                $method = Request::METHOD_PUT;
+                $method = $object::supportsMethod(Request::METHOD_PUT) ? Request::METHOD_PUT : Request::METHOD_POST;
                 $uri = $object::getResourceURI();
                 //@todo, bump version so you must create objects with app context.
                 $object->setApplication($this);
             }
 
-            if(!$object::supportsMethod($method))
-                throw new Exception('%s doesn\'t support [%s] via the API', get_class($object), $method);
+            if(!$object::supportsMethod($method)){
+                throw new Exception(sprintf('%s doesn\'t support [%s] via the API', get_class($object), $method));
+            }
 
             //Put in an array with the first level containing only the 'root node'.
             $data = array($object::getRootNodeName() => $object->toStringArray());
@@ -194,7 +200,7 @@ abstract class Application {
             $response = $request->getResponse();
 
             if(false !== $element = current($response->getElements())) {
-                $object->fromStringArray($element);
+                $object->fromStringArray($element, $replace_data);
             }
             //Mark the object as clean since no exception was thrown
             $object->setClean();
@@ -262,12 +268,12 @@ abstract class Application {
      *
      * This is called automatically from the save method for things like adding contacts to ContactGroups
      *
-     * @param Object $object
+     * @param Remote\Object $object
      * @throws Exception
      */
-    private function savePropertiesDirectly(Object $object){
+    private function savePropertiesDirectly(Remote\Object $object){
         foreach($object::getProperties() as $property_name => $meta){
-            if($meta[Object::KEY_SAVE_DIRECTLY] && $object->isPropertyDirty($property_name)){
+            if($meta[Remote\Object::KEY_SAVE_DIRECTLY] && $object->isDirty($property_name)){
                 //Then actually save
                 $property_objects = $object->$property_name;
                 $property_type = get_class(current($property_objects));
@@ -302,9 +308,20 @@ abstract class Application {
 
     /**
      * @param Remote\Object $object
+     * @return Remote\Response
+     * @throws Exception
      */
-    public function delete(Object $object) {
+    public function delete(Remote\Object $object) {
+        if(!$object::supportsMethod(Request::METHOD_DELETE)){
+            throw new Exception(sprintf('%s doesn\'t support [DELETE] via the API', get_class($object)));
+        }
 
+        $uri = sprintf('%s/%s', $object::getResourceURI(), $object->getGUID());
+        $url = new URL($this, $uri);
+        $request = new Request($this, $url, Request::METHOD_DELETE);
+        $request->send();
+
+        return $request->getResponse();
     }
 
 }

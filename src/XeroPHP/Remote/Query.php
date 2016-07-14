@@ -3,7 +3,7 @@
 namespace XeroPHP\Remote;
 
 use XeroPHP\Application;
-use XeroPHP\Exception;
+use DateTime;
 
 class Query {
 
@@ -18,6 +18,9 @@ class Query {
     private $order;
     private $modifiedAfter;
     private $page;
+    private $fromDate;
+    private $toDate;
+    private $date;
     private $offset;
 
     public function __construct(Application $app) {
@@ -47,7 +50,17 @@ class Query {
         $args = func_get_args();
 
         if(func_num_args() === 2) {
-            $this->where[] = sprintf('%s=="%s"', $args[0], $args[1]);
+            if(is_bool($args[1])) {
+                $this->where[] = sprintf('%s=%s', $args[0], $args[1] ? 'true' : 'false');
+            } elseif(is_int($args[1])) {
+                $this->where[] = sprintf('%s==%s', $args[0], $args[1]);
+            } elseif(preg_match('/^(\'|")?(true|false)("|\')?$/i', $args[1])) {
+                $this->where[] = sprintf('%s=%s', $args[0], $args[1]);
+            } elseif(preg_match('/^([a-z]+)\.\1ID$/i', $args[0]) && preg_match('/^[0-9a-f]{8}-([0-9a-f]{4}-){3}[0-9a-f]{12}$/i', $args[1])) {
+                $this->where[] = sprintf('%s=Guid("%s")', $args[0], $args[1]);
+            } else {
+                $this->where[] = sprintf('%s=="%s"', $args[0], $args[1]);
+            }
         } else {
             $this->where[] = $args[0];
         }
@@ -71,16 +84,43 @@ class Query {
     }
 
     /**
-     * @param \DateTime|null $modifiedAfter
+     * @param \DateTimeInterface|null $modifiedAfter
      * @return $this
      */
-    public function modifiedAfter(\DateTime $modifiedAfter = null) {
+    public function modifiedAfter(\DateTimeInterface $modifiedAfter = null) {
         if($modifiedAfter === null) {
             $modifiedAfter = new \DateTime('@0'); // since ever
         }
 
         $this->modifiedAfter = $modifiedAfter->format('c');
 
+        return $this;
+    }
+
+    /**
+     * @param DateTime $fromDate
+     * @return $this
+     */
+    public function fromDate(DateTime $fromDate) {
+        $this->fromDate = $fromDate->format('Y-m-d');
+        return $this;
+    }
+
+    /**
+     * @param DateTime $toDate
+     * @return $this
+     */
+    public function toDate(DateTime $toDate) {
+        $this->toDate = $toDate->format('Y-m-d');
+        return $this;
+    }
+
+    /**
+     * @param DateTime $date
+     * @return $this
+     */
+    public function date(DateTime $date) {
+        $this->date = $date->format('Y-m-d');
         return $this;
     }
 
@@ -132,6 +172,18 @@ class Query {
 
         if($this->modifiedAfter !== null) {
             $request->setHeader('If-Modified-Since', $this->modifiedAfter);
+        }
+
+        if($this->fromDate !== null) {
+            $request->setParameter('fromDate', $this->fromDate);
+        }
+
+        if($this->toDate !== null) {
+            $request->setParameter('toDate', $this->toDate);
+        }
+
+        if($this->date !== null) {
+            $request->setParameter('date', $this->date);
         }
 
         if($this->page !== null) {

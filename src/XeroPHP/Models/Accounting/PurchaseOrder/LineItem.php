@@ -1,5 +1,5 @@
 <?php
-namespace XeroPHP\Models\Accounting\RepeatingInvoice;
+namespace XeroPHP\Models\Accounting\PurchaseOrder;
 
 use XeroPHP\Remote;
 use XeroPHP\Models\Accounting\TrackingCategory;
@@ -8,21 +8,20 @@ class LineItem extends Remote\Object
 {
 
     /**
-     * Description needs to be at least 1 char long. A line item with just a description (i.e no unit
-     * amount or quantity) can be created by specifying just a <Description> element that contains at least
-     * 1 character
+     * The description of the line item. A line item can be created with only a description (i.e no unit
+     * amount or quantity)
      *
      * @property string Description
      */
 
     /**
-     * LineItem Quantity
+     * LineItem Quantity. If Quantity is specified then a UnitAmount must be specified
      *
-     * @property string Quantity
+     * @property float Quantity
      */
 
     /**
-     * LineItem Unit Amount
+     * Lineitem unit amount. Will be rounded to four decimal places
      *
      * @property float UnitAmount
      */
@@ -47,32 +46,36 @@ class LineItem extends Remote\Object
      */
 
     /**
-     * The tax amount is auto calculated as a percentage of the line amount (see below) based on the tax
-     * rate. This value can be overriden if the calculated <TaxAmount> is not correct.
+     * Percentage discount being applied to a line item
      *
-     * @property float TaxAmount
+     * @property string DiscountRate
      */
 
     /**
-     * If you wish to omit either of the <Quantity> or <UnitAmount> you can provide a LineAmount and Xero
-     * will calculate the missing amount for you. The line amount reflects the discounted price if a
-     * DiscountRate has been used . i.e LineAmount = Quantity * Unit Amount * ((100 – DiscountRate)/100)
-     *
-     * @property float LineAmount
-     */
-
-    /**
-     * Optional Tracking Category – see Tracking.  Any LineItem can have a maximum of 2
-     * <TrackingCategory> elements.
+     * Optional Tracking Category – see Tracking. Any LineItem can have a maximum of 2 <TrackingCategory>
+     * elements.
      *
      * @property TrackingCategory[] Tracking
      */
 
     /**
-     * Percentage discount being applied to a line item (only supported on ACCREC invoices – ACC PAY
-     * invoices and credit notes in Xero do not support discounts
+     * The Xero generated identifier for a LineItem. If LineItemIDs are not included with line items in an
+     * update request then the line items are deleted and recreated.
      *
-     * @property string DiscountRate
+     * @property string LineItemID
+     */
+
+    /**
+     * The tax amount is auto calculated as a percentage of the line amount based on the tax rate.
+     *
+     * @property float TaxAmount
+     */
+
+    /**
+     * The line amount reflects the discounted price if a DiscountRate has been used . i.e LineAmount =
+     * Quantity * Unit Amount * ((100 – DiscountRate)/100)
+     *
+     * @property float LineAmount
      */
 
 
@@ -106,7 +109,7 @@ class LineItem extends Remote\Object
      */
     public static function getGUIDProperty()
     {
-        return '';
+        return 'LineItemID';
     }
 
 
@@ -145,15 +148,16 @@ class LineItem extends Remote\Object
     {
         return array(
             'Description' => array (false, self::PROPERTY_TYPE_STRING, null, false, false),
-            'Quantity' => array (false, self::PROPERTY_TYPE_STRING, null, false, false),
+            'Quantity' => array (false, self::PROPERTY_TYPE_FLOAT, null, false, false),
             'UnitAmount' => array (false, self::PROPERTY_TYPE_FLOAT, null, false, false),
             'ItemCode' => array (false, self::PROPERTY_TYPE_STRING, null, false, false),
             'AccountCode' => array (false, self::PROPERTY_TYPE_STRING, null, false, false),
             'TaxType' => array (false, self::PROPERTY_TYPE_ENUM, null, false, false),
-            'TaxAmount' => array (false, self::PROPERTY_TYPE_FLOAT, null, false, false),
-            'LineAmount' => array (false, self::PROPERTY_TYPE_FLOAT, null, false, false),
+            'DiscountRate' => array (false, self::PROPERTY_TYPE_STRING, null, false, false),
             'Tracking' => array (false, self::PROPERTY_TYPE_OBJECT, 'Accounting\\TrackingCategory', true, false),
-            'DiscountRate' => array (false, self::PROPERTY_TYPE_STRING, null, false, false)
+            'LineItemID' => array (false, self::PROPERTY_TYPE_STRING, null, false, false),
+            'TaxAmount' => array (false, self::PROPERTY_TYPE_FLOAT, null, false, false),
+            'LineAmount' => array (false, self::PROPERTY_TYPE_FLOAT, null, false, false)
         );
     }
 
@@ -182,7 +186,7 @@ class LineItem extends Remote\Object
     }
 
     /**
-     * @return string
+     * @return float
      */
     public function getQuantity()
     {
@@ -190,7 +194,7 @@ class LineItem extends Remote\Object
     }
 
     /**
-     * @param string $value
+     * @param float $value
      * @return LineItem
      */
     public function setQuantity($value)
@@ -277,6 +281,67 @@ class LineItem extends Remote\Object
     }
 
     /**
+     * @return string
+     */
+    public function getDiscountRate()
+    {
+        return $this->_data['DiscountRate'];
+    }
+
+    /**
+     * @param string $value
+     * @return LineItem
+     */
+    public function setDiscountRate($value)
+    {
+        $this->propertyUpdated('DiscountRate', $value);
+        $this->_data['DiscountRate'] = $value;
+        return $this;
+    }
+
+    /**
+     * @return TrackingCategory[]|Remote\Collection
+     * Always returns a collection, switch is for type hinting
+     */
+    public function getTracking()
+    {
+        return $this->_data['Tracking'];
+    }
+
+    /**
+     * @param TrackingCategory $value
+     * @return LineItem
+     */
+    public function addTracking(TrackingCategory $value)
+    {
+        $this->propertyUpdated('Tracking', $value);
+        if(!isset($this->_data['Tracking'])){
+            $this->_data['Tracking'] = new Remote\Collection();
+        }
+        $this->_data['Tracking'][] = $value;
+        return $this;
+    }
+
+    /**
+     * @return string
+     */
+    public function getLineItemID()
+    {
+        return $this->_data['LineItemID'];
+    }
+
+    /**
+     * @param string $value
+     * @return LineItem
+     */
+    public function setLineItemID($value)
+    {
+        $this->propertyUpdated('LineItemID', $value);
+        $this->_data['LineItemID'] = $value;
+        return $this;
+    }
+
+    /**
      * @return float
      */
     public function getTaxAmount()
@@ -311,48 +376,6 @@ class LineItem extends Remote\Object
     {
         $this->propertyUpdated('LineAmount', $value);
         $this->_data['LineAmount'] = $value;
-        return $this;
-    }
-
-    /**
-     * @return TrackingCategory[]|Remote\Collection
-     * Always returns a collection, switch is for type hinting
-     */
-    public function getTracking()
-    {
-        return $this->_data['Tracking'];
-    }
-
-    /**
-     * @param TrackingCategory $value
-     * @return LineItem
-     */
-    public function addTracking(TrackingCategory $value)
-    {
-        $this->propertyUpdated('Tracking', $value);
-        if(!isset($this->_data['Tracking'])){
-            $this->_data['Tracking'] = new Remote\Collection();
-        }
-        $this->_data['Tracking'][] = $value;
-        return $this;
-    }
-
-    /**
-     * @return string
-     */
-    public function getDiscountRate()
-    {
-        return $this->_data['DiscountRate'];
-    }
-
-    /**
-     * @param string $value
-     * @return LineItem
-     */
-    public function setDiscountRate($value)
-    {
-        $this->propertyUpdated('DiscountRate', $value);
-        $this->_data['DiscountRate'] = $value;
         return $this;
     }
 
